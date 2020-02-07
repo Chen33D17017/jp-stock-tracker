@@ -38,8 +38,7 @@ class Record(Base):
     high_value = Column(Integer, nullable=False)
     low_value = Column(Integer, nullable=False)
     close_value = Column(Integer, nullable=False)
-    # TODO: Change the miss spell in here
-    volumn_value = Column(Integer, nullable=False)
+    volume_value = Column(Integer, nullable=False)
     adjclose_value = Column(Integer, nullable=False)
 
     def __repr__(self):
@@ -47,6 +46,3 @@ class Record(Base):
 
 if not os.path.isfile('data.db'):
     Base.metadata.create_all(engine)
-
-if __name__ == '__main__':
-    print("Hello world")

@@ -7,7 +7,6 @@ from datetime import datetime, date
 import random
 from bs4 import BeautifulSoup
 import re
-from tqdm import tqdm
 from db_model import Stock, Record, DB_manager
 
 
@@ -117,12 +116,15 @@ class stockDataReader():
                 tmp = se.query(Record).filter(Record.stock_id==self.stock_id, Record.record_date==record_date).first()
                 # If not exist add the record
                 if not tmp:
-                    new_record = Record(stock_id=self.stock_id, record_date=record_date, open_value=self.result['open'][i], high_value=self.result['high'][i], low_value=self.result['low'][i], close_value=self.result['close'][i], volumn_value=self.result['volume'][i], adjclose_value=self.result['adjclose'][i])
+                    new_record = Record(stock_id=self.stock_id, record_date=record_date, open_value=self.result['open'][i], high_value=self.result['high'][i], low_value=self.result['low'][i], close_value=self.result['close'][i], volume_value=self.result['volume'][i], adjclose_value=self.result['adjclose'][i])
                     se.add(new_record)
             se.commit()
 
-    def read_DB(self, date_range=None):
+    def read_DB_with_update(self, date_range=None):
         self.update_DB()
+        self.read_DB(date_range=date_range)
+    
+    def read_DB(self, date_range=None):
         self.result = {
             "date": [],
             "open": [],
@@ -143,7 +145,7 @@ class stockDataReader():
                 self.result['high'].append(item.high_value)
                 self.result['low'].append(item.low_value)
                 self.result['close'].append(item.close_value)
-                self.result['volume'].append(item.volumn_value)
+                self.result['volume'].append(item.volume_value)
                 self.result['adjclose'].append(item.adjclose_value)
         return self.get_df()
 
