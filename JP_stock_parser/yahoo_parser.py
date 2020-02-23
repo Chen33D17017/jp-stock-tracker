@@ -35,14 +35,23 @@ class stockDataReader(ParserBase):
         page_now = 1
         while True:
             page_info = self.soup.select("ul.ymuiPagingBottom.clearFix")
+            # if get the page information
             if page_info:
                 page_info = page_info[0]
                 pages = [i.contents[0] for i in page_info.find_all("a")]
+                # if exist other page
                 if pages:
-                    pages = pages[0:-1]
+                    # get rid of 次へ (if not in last page)
+                    if pages[-1] == "次へ":
+                        pages = pages[0:-1]
+                    # if in the final page
+                    else:
+                        break
                 else:
+                    # if only have one page
                     pages = ['1']
                 if pages[0] == "前へ":
+                    # get rid of 前へ
                     pages = pages[1::]
                 pages = list(map(int, pages))
                 if page_now <= pages[-1]:
@@ -65,12 +74,15 @@ class stockDataReader(ParserBase):
         for i, item in enumerate(table):
             data = [row.contents[0] for row in item.find_all('td')]
             if data:
-                self.result["date"].append(self.date_convert(data[0]))
-                self.result["open"].append(self.money_convert(data[1]))
-                self.result["high"].append(self.money_convert(data[2]))
-                self.result["low"].append(self.money_convert(data[3]))
-                self.result["close"].append(self.money_convert(data[4]))
-                self.result["volume"].append(self.money_convert(data[5]))
-                self.result["adjclose"].append(self.money_convert(data[6]))
+                try:
+                    self.result["date"].append(self.date_convert(data[0]))
+                    self.result["open"].append(self.money_convert(data[1]))
+                    self.result["high"].append(self.money_convert(data[2]))
+                    self.result["low"].append(self.money_convert(data[3]))
+                    self.result["close"].append(self.money_convert(data[4]))
+                    self.result["volume"].append(self.money_convert(data[5]))
+                    self.result["adjclose"].append(self.money_convert(data[6]))
+                except ValueError:
+                    continue
     
     

@@ -7,14 +7,14 @@ from datetime import datetime, date
 import random
 from bs4 import BeautifulSoup
 import re
-from db_model import Stock, Record, DB_manager
+from db_model import Stock, Record, DBManager
 
 
 class stockDataReader():
     def __init__(self, sn):
         self.stock_id = sn
         self.stock_name = None
-        self.url = "https://stocks.finance.yahoo.co.jp/stocks/history/?code={}.T".format(sn)
+        self.url = None
         self.start_date = None
         self.end_date = None
         self.result = None
@@ -22,7 +22,7 @@ class stockDataReader():
         ssl._create_default_https_context = ssl._create_unverified_context
 
     def wait(self):
-        time.sleep(random.randrange(3,7))
+        time.sleep(random.randrange(3,6))
         
     def set_stock_id(self, sn):
         self.stock_id = sn
@@ -104,7 +104,7 @@ class stockDataReader():
         return pd.DataFrame.from_dict(self.result)
 
     def save_data2db(self):
-        with DB_manager() as se:
+        with DBManager() as se:
             tmp = se.query(Stock).filter(Stock.stock_id==self.stock_id).first()
             if not tmp:
                 new_stock = Stock(stock_id=self.stock_id, name=self.stock_name)
@@ -134,7 +134,7 @@ class stockDataReader():
             "volume": [],
             "adjclose": [],
         }
-        with DB_manager() as se:
+        with DBManager() as se:
             get_data_query = se.query(Record).filter(Record.stock_id==self.stock_id)
             if date_range:
                 get_data_query = get_data_query.filter(Record.record_date >= date_range[0], Record.record_date < date_range[1])
@@ -150,7 +150,7 @@ class stockDataReader():
         return self.get_df()
 
     def update_DB(self):
-        with DB_manager() as se:
+        with DBManager() as se:
             latest_date = se.query(Record.record_date).order_by(Record.record_date.desc()).first()[0]
         self.set_data_range(latest_date, date.today())
         self.get_data()
@@ -165,7 +165,7 @@ def date_convert(content):
 
 def money_convert(content):
     str_value = "".join(content.split(","))
-    return int(str_value)
+    return float(str_value)
 
         
         

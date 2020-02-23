@@ -60,7 +60,7 @@ class ParserBase():
 
     def read_DB_with_update(self, date_range=None):
         self.update_DB()
-        self.read_DB(date_range=date_range)
+        return self.read_DB(date_range=date_range)
     
     def read_DB(self, date_range=None):
         self.result = {
@@ -87,11 +87,11 @@ class ParserBase():
                 self.result['adjclose'].append(item.adjclose_value)
         return self.get_df()
 
-    def update_DB(self):
+    def update_DB(self, verbose=False):
         with DBManager() as se:
-            latest_date = se.query(Record.record_date).order_by(Record.record_date.desc()).first()[0]
-        self.set_data_range(latest_date, date.today())
-        self.get_data()
+            latest_date = se.query(Record.record_date).filter(Record.stock_id==self.stock_id).order_by(Record.record_date.desc()).first()[0]
+        self.set_stock(time_range=[latest_date, date.today()])
+        self.get_data(verbose=verbose)
         self.save_data2db()
 
     def wait(self):
@@ -103,4 +103,5 @@ class ParserBase():
 
     def money_convert(self, content):
         str_value = "".join(content.split(","))
-        return float(str_value)
+        result = float(str_value)    
+        return result
